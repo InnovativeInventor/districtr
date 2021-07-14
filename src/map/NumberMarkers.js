@@ -1,6 +1,7 @@
 import Layer from "./Layer";
 import { colorScheme } from "../colors";
 import { spatial_abilities } from "../utils";
+import { Chance } from "chance";
 
 export default function NumberMarkers(state, brush) {
     const spacer = String.fromCharCode(8202) + String.fromCharCode(8202);
@@ -148,9 +149,9 @@ export default function NumberMarkers(state, brush) {
                 // up to 100 random GEOIDs in GET url
                 // have requested help to POST
                 let district_num = moveMarkers[d_index];
-                let filterOdds = 100 / markers[district_num].length;
-                if (filterOdds < 1) {
-                    markers[district_num] = markers[district_num].filter(() => (Math.random() < filterOdds));
+                var random = new Chance(markers[district_num]);
+                if (markers[district_num].length > 100) {
+                    markers[district_num] = random.pickset(markers[district_num], 100);
                 }
                 const serverurl = `//mggg.pythonanywhere.com/findCenter?place=${placeID}&`;
                     // : `https://mggg-states.subzero.cloud/rest/rpc/merged_${placeID}?`
@@ -173,7 +174,7 @@ export default function NumberMarkers(state, brush) {
                         };
                     }
                     map.getSource("number_source_" + district_num).setData(numberMarkers[district_num]);
-                }).catch(() => {console.log("Fetch failed")});
+                }).catch(() => {console.log("Fetch failed", `${serverurl}ids=${markers[district_num].join(sep)}`)});
             }
             for (let d_index = 0; d_index < moveMarkers.length; d_index++) {
                 check_district(d_index);
@@ -187,6 +188,6 @@ export default function NumberMarkers(state, brush) {
             });
         }
     };
-    // updater(state);
+    updater(state);
     return { update: updater };
 }
